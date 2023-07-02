@@ -2,13 +2,14 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-# from .models import related models
-# from .restapis import related methods
+#from .models import CarDealer
+from .restapis import get_dealers_from_cf, get_dealers_by_state,get_dealers_by_id, get_dealer_by_id_from_cf, post_request
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -80,16 +81,63 @@ def registration_request(request):
 
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
-    context = {}
     if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+        context = {}
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/dealership-package/get-dealership"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
+    
+def get_dealerships_by_state(request,state="Texas"):
+    if request.method == "GET":
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/dealership-package/get-dealership"
+        # Get dealers from the URL
+        dealerships = get_dealers_by_state(url,state)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
+    
+def get_dealerships_by_id(request,id=1):
+    if request.method == "GET":
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/dealership-package/get-dealership"
+        # Get dealers from the URL
+        dealerships = get_dealers_by_id(url,id)
+        # Concat all dealer's short name
+        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        # Return a list of dealer short name
+        return HttpResponse(dealer_names)
+    
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
-# def get_dealer_details(request, dealer_id):
-# ...
+def get_dealer_details(request, dealer_id):
+    if request.method == "GET":
+        url = "https://us-south.functions.appdomain.cloud/api/v1/web/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/dealership-package/get-review"
+        # Get reviews from the URL
+        reviews = get_dealer_by_id_from_cf(url,dealer_id)
+        reviews = ' '.join([review.review+":"+review.sentiment+"<br>" for review in reviews])
+        return HttpResponse(reviews)
+
 
 # Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id):
+    json_result={}
+    if request.method =="POST":
+        #if request.user.is_authenticated:
+        url = "https://us-south.functions.cloud.ibm.com/api/v1/namespaces/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/actions/dealership-package/post-review"
+        api_key="_GuQrqFdEw6XzhL7xiLHa5yycwSy6evIf6xijUeaiGwz"
+        review={}
+        review["time"] = datetime.utcnow().isoformat()
+        review["dealership"] = dealer_id
+        review["review"] = "This is a great car dealer"
+        json_payload={}
+        json_payload["review"]=review
+        json_result = post_request(url, api_key,json_payload)
+    return HttpResponse(json_result)
+
+            
 
