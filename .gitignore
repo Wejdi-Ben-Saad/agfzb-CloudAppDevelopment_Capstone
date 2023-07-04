@@ -142,4 +142,5 @@ server/djangoapp/migrations/
 
 # Ignore Credentials files:
 server/djangoapp/Credentials.py
+server/djangobackend/django_secret_key.py
 functions/sample/nodejs/.creds.json
