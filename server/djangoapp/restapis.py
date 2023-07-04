@@ -3,6 +3,7 @@ import json
 # import related models here
 from requests.auth import HTTPBasicAuth
 from .models import CarDealer, DealerReview
+from .credentials import credentials_dictionary
 
 
 # Create a `get_request` to make HTTP GET requests
@@ -152,8 +153,9 @@ def get_dealer_by_id_from_cf(url, dealerId):
 
 # Create an `analyze_review_sentiments` method to call Watson NLU and analyze text
 def analyze_review_sentiments(review):
-    url = "https://api.eu-de.natural-language-understanding.watson.cloud.ibm.com/instances/939f5955-4e1f-428d-b7ee-214ea1ee3ef8/v1/analyze"
-    api_key = "mEBhFsTKwnGJ9tUJAU5d444HdbVzxp4Cm3LLyl7OFxt5"
+    
+    url = credentials_dictionary["Watson_NLU"]["url"]
+    api_key = credentials_dictionary["Watson_NLU"]["api_key"]
     
     params = dict()
     params["text"] = review

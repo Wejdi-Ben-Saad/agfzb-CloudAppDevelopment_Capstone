@@ -10,6 +10,7 @@ from datetime import datetime
 import logging
 import json
 from .models import CarModel
+from .credentials import credentials_dictionary
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -132,8 +133,9 @@ def add_review(request, dealer_id):
     json_result={}
     if request.method =="POST":
         if request.user.is_authenticated:
-            url = "https://us-south.functions.cloud.ibm.com/api/v1/namespaces/02ddb919-0a17-4fb5-a9db-36ebc037a2e9/actions/dealership-package/post-review"
-            api_key="_GuQrqFdEw6XzhL7xiLHa5yycwSy6evIf6xijUeaiGwz"
+            url = credentials_dictionary["add_review"]["url"]
+            api_key = credentials_dictionary["add_review"]["api_key"]
+
             review={}
             review["time"] = datetime.utcnow().isoformat()
             review["dealership"] = dealer_id
